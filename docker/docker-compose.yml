@@ -1,0 +1,21 @@
+version: "3.9"
+name: pyhealthnet
+services:
+  client:
+    image: overlydev/pyhealthnet-client
+    init: true
+    user: 1000:1000         # Change this to your UID:GID, found by running 'id'
+    environment:
+      DEBUG_LOGS: False     # Set to True to see debug console output
+    volumes:
+      - ./client-storage:/app/client-storage
+    restart: unless-stopped
+  server:
+    image: overlydev/pyhealthnet-server
+    init: true
+    user: 1000:1000         # Change this to your UID:GID, found by running 'id'
+    environment:
+      DEBUG_LOGS: False     # Set to True to see debug console output
+    volumes:
+      - ./server-storage:/app/server-storage
+    restart: unless-stopped

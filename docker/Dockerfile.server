@@ -1,0 +1,19 @@
+FROM python:3.8.15-alpine3.16 as base
+
+FROM base as builder
+
+WORKDIR /install
+COPY requirements.txt requirements.txt
+RUN python -m venv venv
+RUN venv/bin/pip3 install --upgrade pip && \
+    venv/bin/pip3 install --no-cache-dir pip-tools && \
+    venv/bin/pip-sync
+
+FROM base
+
+WORKDIR /app
+COPY --from=builder /install/venv /app/venv
+COPY server/* .
+COPY ./entrypoint-server.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
+ENTRYPOINT ["./entrypoint.sh"]

@@ -1,0 +1,7 @@
+.env
+settings.json
+venv
+**/__pycache__
+**/client-storage
+**/server-storage
+**/_context
