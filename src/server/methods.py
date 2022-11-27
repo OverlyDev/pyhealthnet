@@ -1,8 +1,9 @@
 import asyncio
 import logging
 
-from src.models.models import Network, ServerLogConfig
+from src.models.models import FastApiConfig, Network, ServerLogConfig
 from src.util.common import (
+    API_DOCS,
     DEBUG_LOGS,
     GRACE_PERIOD,
     NETWORK_NAME,
@@ -18,6 +19,10 @@ def generate_log_config() -> dict:
     level = "DEBUG" if DEBUG_LOGS else "INFO"
     config = ServerLogConfig(LOG_LEVEL=level)
     return config.dict()
+
+
+def generate_fastapi_config() -> dict:
+    return FastApiConfig(docs_enabled=API_DOCS).dict()
 
 
 def create_network_from_env() -> Network:
