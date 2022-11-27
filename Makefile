@@ -1,6 +1,9 @@
 # define the name of the virtual environment directory
 VENV := venv
 
+# list of .in files for pip-tools
+REQS := requirements.in dev-requirements.in client-requirements.in server-requirements.in
+
 # default target, when make executed without arguments
 all: $(VENV)
 
@@ -15,17 +18,11 @@ $(VENV)/bin/activate:
 
 # generate requirements .txt files
 reqs:
-	$(VENV)/bin/pip-compile --resolver=backtracking pip/requirements.in
-	$(VENV)/bin/pip-compile --resolver=backtracking pip/dev-requirements.in
-	$(VENV)/bin/pip-compile --resolver=backtracking pip/client-requirements.in
-	$(VENV)/bin/pip-compile --resolver=backtracking pip/server-requirements.in
+	for file in $(REQS) ; do $(VENV)/bin/pip-compile --resolver=backtracking pip/$$file ; done
 
 # upgrade requirements versions
 reqs_upgrade:
-	$(VENV)/bin/pip-compile --resolver=backtracking --upgrade pip/requirements.in
-	$(VENV)/bin/pip-compile --resolver=backtracking --upgrade pip/dev-requirements.in
-	$(VENV)/bin/pip-compile --resolver=backtracking --upgrade pip/client-requirements.in
-	$(VENV)/bin/pip-compile --resolver=backtracking --upgrade pip/server-requirements.in
+	for file in $(REQS) ; do $(VENV)/bin/pip-compile --resolver=backtracking --upgrade pip/$$file ; done
 
 # formatters
 format:
@@ -66,8 +63,5 @@ docker_server:
 
 test_models:
 	$(VENV)/bin/python3 src/models/models.py
-
-test_args:
-	$(VENV)/bin/python3 src/models/args.py --help
 
 .PHONY: all venv reqs reqs_upgrade format run_client run_server clean docker_client docker_server test_models
