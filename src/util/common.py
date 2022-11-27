@@ -11,7 +11,7 @@ logger = logging.getLogger()
 
 # load things from ENV
 load_dotenv()
-DEBUG_LOGS = bool(getenv("DEBUG_LOGS"))
+DEBUG_LOGS = bool(True if getenv("DEBUG_LOGS").lower() == "true" else False)
 
 # client env
 SERVER_HOST = getenv("SERVER_HOST")

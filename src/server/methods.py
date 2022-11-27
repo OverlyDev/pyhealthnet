@@ -1,34 +1,58 @@
 import asyncio
+import logging
 
-from src.models.models import Network
-from src.util.common import GRACE_PERIOD, NETWORK_NAME, logger
+from src.models.models import Network, ServerLogConfig
+from src.util.common import (
+    DEBUG_LOGS,
+    GRACE_PERIOD,
+    NETWORK_NAME,
+    convert_model_to_json,
+)
+
+
+# set up logging for this module
+logger = logging.getLogger("pyhealthnet-server")
+
+
+def generate_log_config() -> dict:
+    level = "DEBUG" if DEBUG_LOGS else "INFO"
+    config = ServerLogConfig(LOG_LEVEL=level)
+    return config.dict()
 
 
 def create_network_from_env() -> Network:
-    logger.info("Creating network from env")
 
     info = {"name": NETWORK_NAME}
     network = Network(**info)
+    logger.debug("Created network from env:")
+    logger.debug(convert_model_to_json(network))
+
     return network
 
 
 async def expect_client_response(duration: int, client_id):
     try:
-        print("sleeping for client interval:", duration)
+        logger.debug("Client ({}), sleeping for {}s".format(client_id, duration))
         await asyncio.sleep(duration)
-        print("sleeping for grace period:", GRACE_PERIOD)
+
+        logger.debug(
+            "Client ({}), sleeping for grace period: {}s".format(
+                client_id, GRACE_PERIOD
+            )
+        )
         await asyncio.sleep(GRACE_PERIOD)
-        print("triggering notification")
+
+        logger.debug("Client ({}), triggering notification".format(client_id))
         send_notification(client_id)
         return
 
     except asyncio.CancelledError:
-        print("received cancel for:", client_id)
+        logger.debug("Client ({}), received cancel".format(client_id))
         return
 
 
 def send_notification(client_id):
-    print("OH MY GOD NOTIFICATION BECAUSE OF:", client_id)
+    logger.error("Client ({}), OH MY GOD NOTIFICATION".format(client_id))
     return
 
 
@@ -44,7 +68,6 @@ class CustomBackgroundHandler:
         self.tasks.update({client_id: task})
 
     def cancel_sleep_task(self, client_id):
-        print("Cancelling task")
         task = self.tasks.get(client_id)
         if task is not None:
             task.cancel()

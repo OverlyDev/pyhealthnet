@@ -89,7 +89,6 @@ class Network(BaseModel):
 
     def add_client(self, client: Client) -> bool:
         if client.id in self.clients.keys():
-            print("client already registered")
             return False
         self.clients.update({client.id: client})
         return True
@@ -106,3 +105,40 @@ class Network(BaseModel):
         client.last_checkin = heartbeat.timestamp
         client.last_status = heartbeat.status
         self.clients[client_id] = client
+
+
+class ServerLogConfig(BaseModel):
+    """Logging configuration for the pyHealthNet server"""
+
+    LOGGER_NAME: str = "pyhealthnet-server"
+    LOG_FORMAT: str = "[%(asctime)s] %(levelname)-8s %(module)-12s %(message)s"
+    LOG_LEVEL: str = "INFO"
+    version: int = None
+    disable_existing_loggers: bool = None
+    formatters: dict = None
+    handlers: dict = None
+    loggers: dict = None
+
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+
+        # logging config
+        self.version = 1
+        self.disable_existing_loggers = False
+        self.formatters = {
+            "default": {
+                "()": "uvicorn.logging.DefaultFormatter",
+                "fmt": self.LOG_FORMAT,
+                "datefmt": "%Y-%m-%d %H:%M:%S",
+            },
+        }
+        self.handlers = {
+            "default": {
+                "formatter": "default",
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stderr",
+            },
+        }
+        self.loggers = {
+            "pyhealthnet-server": {"handlers": ["default"], "level": self.LOG_LEVEL},
+        }
