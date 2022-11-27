@@ -11,19 +11,19 @@ from src.models.models import (
     Status,
 )
 from src.server.methods import (
-    CustomBackgroundHandler,
+    ServerBackgroundHandler,
     create_network_from_env,
     generate_fastapi_config,
-    generate_log_config,
 )
+from src.util.common import SERVER_LOGGER, generate_log_config
 
 
 # set up logging
-dictConfig(generate_log_config())
-logger = logging.getLogger("pyhealthnet-server")
+dictConfig(generate_log_config("server"))
+logger = logging.getLogger("pyhealthnet-{}".format(SERVER_LOGGER))
 
 network = create_network_from_env()
-background = CustomBackgroundHandler()
+background = ServerBackgroundHandler()
 
 app = FastAPI(**generate_fastapi_config())
 

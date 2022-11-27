@@ -1,24 +1,18 @@
 import asyncio
 import logging
 
-from src.models.models import FastApiConfig, Network, ServerLogConfig
+from src.models.models import FastApiConfig, Network
 from src.util.common import (
     API_DOCS,
-    DEBUG_LOGS,
     GRACE_PERIOD,
     NETWORK_NAME,
+    SERVER_LOGGER,
     convert_model_to_json,
 )
 
 
 # set up logging for this module
-logger = logging.getLogger("pyhealthnet-server")
-
-
-def generate_log_config() -> dict:
-    level = "DEBUG" if DEBUG_LOGS else "INFO"
-    config = ServerLogConfig(LOG_LEVEL=level)
-    return config.dict()
+logger = logging.getLogger("pyhealthnet-{}".format(SERVER_LOGGER))
 
 
 def generate_fastapi_config() -> dict:
@@ -61,7 +55,7 @@ def send_notification(client_id):
     return
 
 
-class CustomBackgroundHandler:
+class ServerBackgroundHandler:
     def __init__(self) -> None:
         self.tasks = {}
 
