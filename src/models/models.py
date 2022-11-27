@@ -19,13 +19,11 @@ class Status(IntEnum):
 
 class Heartbeat(BaseModel):
     machine_id: UUID
-    timestamp: datetime.datetime = datetime.datetime.utcnow()
     status: Status = Status.OK
 
 
 class RegistrationRequest(BaseModel):
     client_name: str
-    timestamp: datetime.datetime = datetime.datetime.utcnow()
     interval: int = 60 * 5  # 5 minutes
 
 
@@ -102,7 +100,7 @@ class Network(BaseModel):
     def client_heartbeat(self, heartbeat: Heartbeat):
         client_id = heartbeat.machine_id
         client = self.clients.get(client_id)
-        client.last_checkin = heartbeat.timestamp
+        client.last_checkin = datetime.datetime.utcnow()
         client.last_status = heartbeat.status
         self.clients[client_id] = client
 
@@ -142,3 +140,30 @@ class ServerLogConfig(BaseModel):
         self.loggers = {
             "pyhealthnet-server": {"handlers": ["default"], "level": self.LOG_LEVEL},
         }
+
+
+class FastApiConfig(BaseModel):
+    docs_enabled: bool
+    title: str = "pyHealthNet Server"
+    description: str = None
+    version: str = "0.0.1"
+    terms_of_service: str = ""
+    contact = {
+        "name": "OverlyDev",
+        "url": None,
+        "email": None,
+    }
+    # license_info = {
+    #     "name": "",
+    #     "url": "",
+    # }
+    openapi_url: str = "/api/v1/openapi.json"
+    docs_url: str = "/docs"
+    redoc_url: str = "/redoc"
+
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+        if not self.docs_enabled:
+            self.openapi_url = None
+            self.docs_url = None
+            self.redoc_url = None
