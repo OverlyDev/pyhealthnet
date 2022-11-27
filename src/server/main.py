@@ -8,12 +8,12 @@ from src.models.models import (
     Heartbeat,
     RegistrationRequest,
     RegistrationResponse,
-    ServerLogConfig,
     Status,
 )
 from src.server.methods import (
     CustomBackgroundHandler,
     create_network_from_env,
+    generate_fastapi_config,
     generate_log_config,
 )
 
@@ -25,12 +25,12 @@ logger = logging.getLogger("pyhealthnet-server")
 network = create_network_from_env()
 background = CustomBackgroundHandler()
 
-app = FastAPI()
+app = FastAPI(**generate_fastapi_config())
 
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"detail": "pyHealthNet Server"}
 
 
 @app.post("/register")
