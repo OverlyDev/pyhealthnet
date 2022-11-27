@@ -24,6 +24,7 @@ CLIENT_NAME = getenv("CLIENT_NAME")
 # server env
 NETWORK_NAME = getenv("NETWORK_NAME")
 GRACE_PERIOD = int(getenv("GRACE_PERIOD"))
+API_DOCS = bool(True if getenv("API_DOCS").lower() == "true" else False)
 
 # storage folders
 CWD = pathlib.Path(__file__).parent.resolve()
