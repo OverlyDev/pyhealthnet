@@ -1,7 +1,7 @@
 import datetime
 from enum import IntEnum
 from ipaddress import IPv4Address
-from typing import Any, List, Literal
+from typing import Any, Dict, List
 from uuid import NAMESPACE_DNS, UUID, uuid5
 
 import orjson
@@ -13,6 +13,7 @@ class Status(IntEnum):
     ERROR = 1
     SHUTDOWN = 2
     RESTART = 3
+    REGISTERED = 250
     OTHER = 254
 
 
@@ -68,8 +69,9 @@ class Client(BaseModel):
     name: str
     network: UUID
     id: UUID = None
-    last_checkin: datetime.datetime = None
+    last_checkin: datetime.datetime = datetime.datetime.utcnow()
     interval: int = None
+    last_status: Status = None
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
@@ -79,24 +81,28 @@ class Client(BaseModel):
 class Network(BaseModel):
     name: str = "pyhealthnet"
     id: UUID = None
-    clients: List[Client] = None
+    clients: Dict[UUID, Client] = {}
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
         self.id = uuid5(NAMESPACE_DNS, self.name)
 
+    def add_client(self, client: Client) -> bool:
+        if client.id in self.clients.keys():
+            print("client already registered")
+            return False
+        self.clients.update({client.id: client})
+        return True
 
-if __name__ == "__main__":
-    network = Network()
-    print("network:\n", network.json)
+    def get_client(self, client_id) -> Client:
+        return self.clients[client_id]
 
-    server = Server(hostname="phn.overly.dev", port=420)
-    print("server:\n", server.json)
+    def get_client_ids(self) -> List[UUID]:
+        return self.clients.keys()
 
-    client = Client(name="testclient", network=network.id)
-    print("client:\n", client.json)
-
-    rr = RegistrationRequest(client_name="testclient")
-    print("rr:\n", rr.json)
-    print()
-    print(orjson.loads(rr.json()))
+    def client_heartbeat(self, heartbeat: Heartbeat):
+        client_id = heartbeat.machine_id
+        client = self.clients.get(client_id)
+        client.last_checkin = heartbeat.timestamp
+        client.last_status = heartbeat.status
+        self.clients[client_id] = client

@@ -1,7 +1,6 @@
 import logging
 import pathlib
 from os import getenv
-from typing import Literal
 
 import orjson
 from dotenv import load_dotenv
@@ -23,6 +22,8 @@ MESSAGE_INTERVAL = getenv("MESSAGE_INTERVAL")
 CLIENT_NAME = getenv("CLIENT_NAME")
 
 # server env
+NETWORK_NAME = getenv("NETWORK_NAME")
+GRACE_PERIOD = int(getenv("GRACE_PERIOD"))
 
 # storage folders
 CWD = pathlib.Path(__file__).parent.resolve()

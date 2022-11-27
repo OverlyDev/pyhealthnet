@@ -35,7 +35,7 @@ run_client: format
 
 # run the server
 run_server: format
-	$(VENV)/bin/uvicorn --app-dir src/server main:app --reload
+	$(VENV)/bin/python3 -m uvicorn --app-dir src/server main:app --reload
 
 # delete the venv
 clean:
@@ -60,8 +60,5 @@ docker_server:
 	$(VENV)/bin/pip-compile --resolver=backtracking pip/requirements.in pip/server-requirements.in --output-file docker/_context/requirements.txt
 	cp -r src/server docker/_context/.
 	cd docker/_context; docker build -t overlydev/pyhealthnet-server:latest -f Dockerfile.server .
-
-test_models:
-	$(VENV)/bin/python3 src/models/models.py
 
 .PHONY: all venv reqs reqs_upgrade format run_client run_server clean docker_client docker_server test_models
